@@ -3,14 +3,13 @@
 <head>
     <title>Network IPv4 Calculator</title>
 </head>
-<body>
+<body><center>
     <h1>Network IPv4 Calculator</h1>
     <p>Enter an IP address and a subnet mask to calculate network details:</p>
     <label for="ipInput">IP Address:</label>
-    <input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.52">
+    <input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
     <button onclick="document.getElementById('result').innerHTML = ''">Reset Page</button>
     <button onclick="printResults()">Print Results</button>
-    
     <br>
     <label for="subnetMaskInput">Subnet Mask:</label>
     <input type="text" id="subnetMaskInput" placeholder="Enter subnet mask" value="255.255.255.0">
@@ -21,10 +20,19 @@
      </select>
     <br>
     <button onclick="calculateNetworkDetails()">Calculate</button>
-    <br><br>
-    <div id="result"></div>
+    <label><input type="checkbox" name="ShowBinaries" onclick="ToggleShowBinaries()"> Show Binary info</label>
+    <h1 id="ResultsHeader"></h1>
+    <div id="result"  style="align-items: center"></div>
 
     <script>
+        let showBinaries = false;
+        
+        function ToggleShowBinaries(){
+            if(showBinaries==false){
+                showBinaries=true;
+            }else {showBinaries=false}
+        }
+
         function calculateNetworkDetails() {
             const ipInput = document.getElementById('ipInput').value;
             const subnetMaskInput = document.getElementById('subnetMaskInput').value;
@@ -156,21 +164,28 @@
             // Calculate Total Number of IPs Available for Assignment
             const totalIPs = Math.pow(2,subnetSize)-2;
 
+            document.getElementById('ResultsHeader').innerText="Results"
+            if(showBinaries==true){
+                document.getElementById('result').innerHTML += `
+                      <center> <table>
+                        <tr><td>====================================</td><td>=================================</td></tr>
+                        <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
+                        <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
+                        <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
+                        <tr><td>====================================</td><td>=================================</td></tr>
+                    </table><br><br>
+                `
+            }
+            
             document.getElementById('result').innerHTML += `
-                <table>
-
-                <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
-                <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
-                <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
-                <tr><td>====================================</td><td>=================================</td></tr>
-                <tr><td>Network IP in Decimal:</td><td>${networkIPDecimal}</td></tr>
-                <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')}</td></tr>
-                <tr><td>First Available Host IP in Decimal:</td><td>${firstHostIPDecimal}</td></tr>
-                <tr><td>Last Available Host IP in Decimal:</td><td>${lastHostIPDecimal}</td></tr>
-                <tr><td>Network Broadcast IP in Decimal:</td><td>${broadcastIPDecimal}</td></tr>
-                <tr><td>Total Number of hosts bits:</td><td>${subnetSize}</td></tr>
-                <tr><td>Total Number of IPs Available for Assignment:</td><td>${totalIPs}</td></tr>
-
+                <center><table>
+                    <tr><td>Network IP in Decimal:</td><td>${networkIPDecimal}</td></tr>
+                    <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')}</td></tr>
+                    <tr><td>First Available Host IP in Decimal:</td><td>${firstHostIPDecimal}</td></tr>
+                    <tr><td>Last Available Host IP in Decimal:</td><td>${lastHostIPDecimal}</td></tr>
+                    <tr><td>Network Broadcast IP in Decimal:</td><td>${broadcastIPDecimal}</td></tr>
+                    <tr><td>Total Number of hosts bits:</td><td>${subnetSize}</td></tr>
+                    <tr><td>Total Number of IPs Available for Assignment:</td><td>${totalIPs}</td></tr>
                 </table><br><br>
             `;
         }
