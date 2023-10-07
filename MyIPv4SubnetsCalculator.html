@@ -106,7 +106,7 @@
         <option value="NHostsNeeded">Number of Hosts Needed</option>
      </select>
     <br><center>
-    <button onclick="calculateNetworkDetails()">Calculate</button>
+    <button onclick="calculateNetwork()">Calculate</button>
     <button onclick="Reset()">Reset Page</button>
     <button onclick="printResults()">Print Results</button>
     <br></center>
@@ -129,9 +129,20 @@
             }else {showBinaries=false}
         }
 
-        function calculateNetworkDetails() {
-            const ipInput = document.getElementById('ipInput').value;
-            const subnetMaskInput = document.getElementById('subnetMaskInput').value;
+        function calculateNetwork(){
+            let tmpsubnetMaskInput = document.getElementById('subnetMaskInput').value.split(',');
+            let tmpipInput = document.getElementById('ipInput').value;
+            for(i in tmpsubnetMaskInput){
+ //               alert(i+' - ' + tmpipInput)
+                tmpipInput = calculateNetworkDetails(tmpipInput, tmpsubnetMaskInput[i])
+            }
+        }
+        
+        
+        //
+        function calculateNetworkDetails(ipInput, subnetMaskInput) {
+ //           const ipInput = document.getElementById('ipInput').value;
+ //           const subnetMaskInput = document.getElementById('subnetMaskInput').value;
 
             const ipOctets = ipInput.split('.');
             subnetMaskOctets = "";
@@ -147,7 +158,7 @@
                         subnetMaskOctets = subnetMaskInput.split('.');
                     }
 
-            } else if (document.getElementById('Notation').value=="CIDR" && parseInt(subnetMaskInput)<31 && parseInt(subnetMaskInput)>0){        
+            } else if (document.getElementById('Notation').value=="CIDR" && parseInt(subnetMaskInput)<31 && parseInt(subnetMaskInput)>7){        
 
                     tmpCidr = subnetMaskInput;
                     let tmpSubMask="1".repeat(tmpCidr)+"0".repeat(32-tmpCidr)
@@ -291,7 +302,15 @@
                     <tr><td>Total Number of IPs Available for Assignment:</td><td>${totalIPs}</td></tr>
                 </table><br><br>
             `;
+        
+            tmpnextNetworkIp = eval(parseInt(broadcastIPBinary.replace(/\./g,""), 2)+1);
+            tmpnextNetworkIp = tmpnextNetworkIp.toString(2)
+            NextNetworkIpBinary = tmpnextNetworkIp.substr(0,8)+"."+tmpnextNetworkIp.substr(8,8)+"."+tmpnextNetworkIp.substr(16,8)+"."+tmpnextNetworkIp.substr(24,8);
+            NextNetworkIpDecimal = NextNetworkIpBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+
+            return NextNetworkIpDecimal
         }
+
 
         function printResults() {
             // Get the div element by its ID
