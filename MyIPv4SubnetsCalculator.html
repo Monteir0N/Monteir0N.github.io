@@ -1,16 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Network IPv4 Calculator</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #00ffcc;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+       
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+       
+        p {
+            width: 90%;
+            margin-left: 5%;
+            font-size: 18px;
+            text-align: center;
+        }
+       
+        label {
+            font-size: 16px;
+            display: block;
+            margin-top: 10px;
+            margin-left: 5%;
+        }
+       
+        input[type="text"]{
+            width: 85%;
+            padding: 10px;
+            margin: 5px 0;
+            margin-left: 5%;
+            border: 2px solid #00ffcc;
+            background-color: #222;
+            color: #00ffcc;
+            border-radius: 10px; /* Add rounded corners */
+        }
+       
+        select {
+            width: 88%;
+            padding: 10px;
+            margin: 5px 0;
+            margin-left: 5%;
+            border: 2px solid #00ffcc;
+            background-color: #222;
+            color: #00ffcc;
+            border-radius: 10px; /* Add rounded corners */
+        }
+       
+        button {
+            padding: 10px 20px;
+            background-color: #00ffcc;
+            color: #111;
+            border: none;
+            cursor: pointer;
+            width: 25%;
+            max-width: 130px; /* Adjust the maximum width as needed */
+            border-radius: 10px; /* Add rounded corners */
+        }
+       
+        button:hover {
+            background-color: #007766;
+        }
+       
+        #result {
+            width: 85%;
+            padding: 10px;
+            margin: 5px 0;
+            margin-left: 5%;
+            border: 2px solid #00ffcc;
+            background-color: #222;
+            color: #00ffcc;
+            border-radius: 10px; /* Add rounded corners */
+            margin-top: 20px;
+            visibility: hidden
+       }
+       
+        #ResultsHeader {
+            text-align: center;
+            margin-top: 20px;
+        }
+       
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+    </style>
 </head>
-<body ><center>
-    <h1>Network IPv4 Calculator</h1>
+<body>
+      <h1>Network IPv4 Calculator</h1>
     <p>Enter an IP address and a subnet mask to calculate network details:</p>
     <label for="ipInput">IP Address:</label>
     <input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
-    <button onclick="document.getElementById('result').innerHTML = ''">Reset Page</button>
-    <button onclick="printResults()">Print Results</button>
-    <br>
     <label for="subnetMaskInput">Subnet Mask:</label>
     <input type="text" id="subnetMaskInput" placeholder="Enter subnet mask" value="255.255.255.0">
     <select id="Notation" name="cars">
@@ -18,14 +101,23 @@
         <option value="CIDR">CIDR</option>
         <option value="NHostsNeeded">Number of Hosts Needed</option>
      </select>
-    <br>
+    <br><center>
     <button onclick="calculateNetworkDetails()">Calculate</button>
+    <button onclick="Reset()">Reset Page</button>
+    <button onclick="printResults()">Print Results</button>
+    <br></center>
     <label><input type="checkbox" name="ShowBinaries" onclick="ToggleShowBinaries()"> Show Binary info</label>
     <h1 id="ResultsHeader"></h1>
-    <div id="result"  style="align-items: center"></div>
+    <div id="result" style="align-items: center;"></div>
 
     <script>
         let showBinaries = false;
+
+        function Reset(){
+            document.getElementById('ResultsHeader').innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('result').style.visibility='hidden'
+        }
         
         function ToggleShowBinaries(){
             if(showBinaries==false){
@@ -165,14 +257,15 @@
             const totalIPs = Math.pow(2,subnetSize)-2;
 
             document.getElementById('ResultsHeader').innerText="Results"
+            document.getElementById('result').style.visibility="visible"
             if(showBinaries==true){
                 document.getElementById('result').innerHTML += `
                       <center> <table style="font-family: monospace;">
-                        <tr><td>====================================</td><td>=================================</td></tr>
+                        <tr><td>======================</td><td>===================================</td></tr>
                         <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
                         <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
                         <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
-                        <tr><td>====================================</td><td>=================================</td></tr>
+                        <tr><td>======================</td><td>===================================</td></tr>
                     </table><br><br>
                 `
             }
