@@ -4,15 +4,15 @@
     <style>
         body {
             background-color: #111;
-            color: #00ffcc;
+            color: #1289d8;
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
        
         h1 {
-            font-size: 24px;
-            text-align: center;
+            font-size: 40px;
+            text-align: left;
         }
        
         p {
@@ -34,9 +34,9 @@
             padding: 10px;
             margin: 5px 0;
             margin-left: 5%;
-            border: 2px solid #00ffcc;
+            border: 2px solid #1289d8;
             background-color: #222;
-            color: #00ffcc;
+            color: #1289d8;
             border-radius: 10px; /* Add rounded corners */
         }
        
@@ -45,15 +45,15 @@
             padding: 10px;
             margin: 5px 0;
             margin-left: 5%;
-            border: 2px solid #00ffcc;
+            border: 2px solid #1289d8;
             background-color: #222;
-            color: #00ffcc;
+            color: #1289d8;
             border-radius: 10px; /* Add rounded corners */
         }
        
         button {
             padding: 10px 20px;
-            background-color: #00ffcc;
+            background-color: #1289d8;
             color: #111;
             border: none;
             cursor: pointer;
@@ -63,7 +63,7 @@
         }
        
         button:hover {
-            background-color: #007766;
+            background-color: #0b1391;
         }
        
         #result {
@@ -71,9 +71,9 @@
             padding: 10px;
             margin: 5px 0;
             margin-left: 5%;
-            border: 2px solid #00ffcc;
+            border: 2px solid #1289d8;
             background-color: #222;
-            color: #00ffcc;
+            color: #1289d8;
             border-radius: 10px; /* Add rounded corners */
             margin-top: 20px;
             visibility: hidden
@@ -90,7 +90,11 @@
     </style>
 </head>
 <body>
-      <h1>Network IPv4 Calculator</h1>
+    <center>
+        <table>
+        <tr><td><img src="icon.png" width="100" height="100"></td><td><h1>IPv4<br> Calculator</h1></td></tr>
+        </table>
+    
     <p>Enter an IP address and a subnet mask to calculate network details:</p>
     <label for="ipInput">IP Address:</label>
     <input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
@@ -136,17 +140,17 @@
 
                  subnetMaskOctets = subnetMaskInput.split('.');
 
-            } else if (document.getElementById('Notation').value=="CIDR"){        
+            } else if (document.getElementById('Notation').value=="CIDR" && parseInt(subnetMaskInput)<31){        
 
                     tmpCidr = subnetMaskInput;
                     let tmpSubMask="1".repeat(tmpCidr)+"0".repeat(32-tmpCidr)
                     tmpSubMask=tmpSubMask.substr(0,8)+"."+tmpSubMask.substr(8,8)+"."+tmpSubMask.substr(16,8)+"."+tmpSubMask.substr(24,8);
                     subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
 
-            } else if (document.getElementById('Notation').value=="NHostsNeeded"){        
+            } else if (document.getElementById('Notation').value=="NHostsNeeded" && Math.ceil(Math.log2(Number(subnetMaskInput)+2))<25){        
 
                     tmpCidr = Math.ceil(Math.log2(Number(subnetMaskInput)+2));
-                    //alert(eval(Number( subnetMaskInput)+2));
+                    alert(tmpCidr);
                     let tmpSubMask="1".repeat(32-tmpCidr)+"0".repeat(tmpCidr)
                     tmpSubMask=tmpSubMask.substr(0,8)+"."+tmpSubMask.substr(8,8)+"."+tmpSubMask.substr(16,8)+"."+tmpSubMask.substr(24,8);
                     subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
@@ -156,7 +160,8 @@
 
 
             if (ipOctets.length !== 4 || subnetMaskOctets.length !== 4) {
-                document.getElementById('result').innerHTML += 'Invalid input';
+                document.getElementById('result').style.visibility="visible"
+                document.getElementById('result').innerHTML += 'Invalid input<br>';
                 return;
             }
 
@@ -307,5 +312,6 @@
         }
 
     </script>
+    </center>
 </body>
 </html>
