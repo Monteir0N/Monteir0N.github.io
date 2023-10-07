@@ -79,7 +79,6 @@
 				background-color: #222;
 				color: #1289d8;
 				border-radius: 10px;
-				/* Add rounded corners */
 				margin-top: 20px;
 				visibility: hidden
 			}
@@ -148,14 +147,11 @@
 					let tmpsubnetMaskInput = document.getElementById('subnetMaskInput').value.split(',');
 					let tmpipInput = document.getElementById('ipInput').value;
 					for (i in tmpsubnetMaskInput) {
-						//               alert(i+' - ' + tmpipInput)
 						tmpipInput = calculateNetworkDetails(tmpipInput, tmpsubnetMaskInput[i])
 					}
 				}
 				//Calculation and output of the the subneting calculations
 				function calculateNetworkDetails(ipInput, subnetMaskInput) {
-					//           const ipInput = document.getElementById('ipInput').value;
-					//           const subnetMaskInput = document.getElementById('subnetMaskInput').value;
 					const ipOctets = ipInput.split('.');
 					subnetMaskOctets = "";
 					if (document.getElementById('Notation').value == "DotedSubnet") {
