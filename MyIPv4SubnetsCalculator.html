@@ -1,341 +1,310 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <style>
-        body {
-            background-color: #111;
-            color: #1289d8;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-       
-        h1 {
-            font-size: 40px;
-            text-align: left;
-        }
-       
-        p {
-            width: 90%;
-            margin-left: 5%;
-            font-size: 18px;
-            text-align: center;
-        }
-       
-        label {
-            font-size: 16px;
-            display: block;
-            margin-top: 10px;
-            margin-left: 5%;
-        }
-       
-        input[type="text"]{
-            width: 85%;
-            padding: 10px;
-            margin: 5px 0;
-            margin-left: 5%;
-            border: 2px solid #1289d8;
-            background-color: #222;
-            color: #1289d8;
-            border-radius: 10px; /* Add rounded corners */
-        }
-       
-        select {
-            width: 88%;
-            padding: 10px;
-            margin: 5px 0;
-            margin-left: 5%;
-            border: 2px solid #1289d8;
-            background-color: #222;
-            color: #1289d8;
-            border-radius: 10px; /* Add rounded corners */
-        }
-       
-        button {
-            padding: 10px 20px;
-            background-color: #1289d8;
-            color: #111;
-            border: none;
-            cursor: pointer;
-            width: 25%;
-            max-width: 130px; /* Adjust the maximum width as needed */
-            border-radius: 10px; /* Add rounded corners */
-        }
-       
-        button:hover {
-            background-color: #0b1391;
-        }
-       
-        #result {
-            width: 85%;
-            padding: 10px;
-            margin: 5px 0;
-            margin-left: 5%;
-            border: 2px solid #1289d8;
-            background-color: #222;
-            color: #1289d8;
-            border-radius: 10px; /* Add rounded corners */
-            margin-top: 20px;
-            visibility: hidden
-       }
-       
-        #ResultsHeader {
-            text-align: center;
-            margin-top: 20px;
-        }
-       
-        input[type="checkbox"] {
-            margin-right: 5px;
-        }
-    </style>
-</head>
-<body>
-    <center>
-        <table>
-        <tr><td><img src="icon.png" width="100" height="100"></td><td><h1>IPv4<br> Calculator</h1></td></tr>
-        </table>
-    
-    <p>Enter an IP address and a subnet mask to calculate network details:</p>
-    <label for="ipInput">IP Address:</label>
-    <input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
-    <label for="subnetMaskInput">Subnet Mask:</label>
-    <input type="text" id="subnetMaskInput" placeholder="Enter subnet mask" value="255.255.255.0">
-    <select id="Notation" name="cars">
-        <option value="DotedSubnet">Dotted Decimal SubMask</option>
-        <option value="CIDR">CIDR</option>
-        <option value="NHostsNeeded">Number of Hosts Needed</option>
-     </select>
-    <br><center>
-    <button onclick="calculateNetwork()">Calculate</button>
-    <button onclick="Reset()">Reset Page</button>
-    <button onclick="printResults()">Print Results</button>
-    <br></center>
-    <label><input type="checkbox" name="ShowBinaries" onclick="ToggleShowBinaries()"> Show Binary info</label>
-    <h1 id="ResultsHeader"></h1>
-    <div id="result" style="align-items: center;"></div>
+	<head>
+		<style>
+			body {
+				background-color: #111;
+				color: #1289d8;
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+			}
 
-    <script>
-        let showBinaries = false;
+			h1 {
+				font-size: 40px;
+				text-align: left;
+			}
 
-        function Reset(){
-            document.getElementById('ResultsHeader').innerHTML = '';
-            document.getElementById('result').innerHTML = '';
-            document.getElementById('result').style.visibility='hidden'
-        }
-        
-        function ToggleShowBinaries(){
-            if(showBinaries==false){
-                showBinaries=true;
-            }else {showBinaries=false}
-        }
+			p {
+				width: 90%;
+				margin-left: 5%;
+				font-size: 18px;
+				text-align: center;
+			}
 
-        function calculateNetwork(){
-            let tmpsubnetMaskInput = document.getElementById('subnetMaskInput').value.split(',');
-            let tmpipInput = document.getElementById('ipInput').value;
-            for(i in tmpsubnetMaskInput){
- //               alert(i+' - ' + tmpipInput)
-                tmpipInput = calculateNetworkDetails(tmpipInput, tmpsubnetMaskInput[i])
-            }
-        }
-        
-        
-        //
-        function calculateNetworkDetails(ipInput, subnetMaskInput) {
- //           const ipInput = document.getElementById('ipInput').value;
- //           const subnetMaskInput = document.getElementById('subnetMaskInput').value;
+			label {
+				font-size: 16px;
+				display: block;
+				margin-top: 10px;
+				margin-left: 5%;
+			}
 
-            const ipOctets = ipInput.split('.');
-            subnetMaskOctets = "";
+			input[type="text"] {
+				width: 85%;
+				padding: 10px;
+				margin: 5px 0;
+				margin-left: 5%;
+				border: 2px solid #1289d8;
+				background-color: #222;
+				color: #1289d8;
+				border-radius: 10px;
+				/* Add rounded corners */
+			}
+
+			select {
+				width: 88%;
+				padding: 10px;
+				margin: 5px 0;
+				margin-left: 5%;
+				border: 2px solid #1289d8;
+				background-color: #222;
+				color: #1289d8;
+				border-radius: 10px;
+				/* Add rounded corners */
+			}
+
+			button {
+				padding: 10px 20px;
+				background-color: #1289d8;
+				color: #111;
+				border: none;
+				cursor: pointer;
+				width: 25%;
+				max-width: 130px;
+				/* Adjust the maximum width as needed */
+				border-radius: 10px;
+				/* Add rounded corners */
+			}
+
+			button:hover {
+				background-color: #0b1391;
+			}
+
+			#result {
+				width: 85%;
+				padding: 10px;
+				margin: 5px 0;
+				margin-left: 5%;
+				border: 2px solid #1289d8;
+				background-color: #222;
+				color: #1289d8;
+				border-radius: 10px;
+				/* Add rounded corners */
+				margin-top: 20px;
+				visibility: hidden
+			}
+
+			#ResultsHeader {
+				text-align: center;
+				margin-top: 20px;
+			}
+
+			input[type="checkbox"] {
+				margin-right: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<center>
+			<table>
+				<tr>
+					<td>
+						<img src="icon.png" width="100" height="100">
+					</td>
+					<td>
+						<h1>IPv4 <br> Calculator </h1>
+					</td>
+				</tr>
+			</table>
+			<p>Enter an IP address and a subnet mask to calculate network details:</p>
+			<label for="ipInput">IP Address:</label>
+			<input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
+			<label for="subnetMaskInput">Subnet Mask:</label>
+			<input type="text" id="subnetMaskInput" placeholder="Enter subnet mask" value="255.255.255.0">
+			<select id="Notation" name="cars">
+				<option value="DotedSubnet">Dotted Decimal SubMask</option>
+				<option value="CIDR">CIDR</option>
+				<option value="NHostsNeeded">Number of Hosts Needed</option>
+			</select>
+			<br>
+			<center>
+				<button onclick="calculateNetwork()">Calculate</button>
+				<button onclick="Reset()">Reset Page</button>
+				<button onclick="printResults()">Print Results</button>
+				<br>
+			</center>
+			<label>
+				<input type="checkbox" name="ShowBinaries" onclick="ToggleShowBinaries()"> Show Binary info </label>
+			<h1 id="ResultsHeader"></h1>
+			<div id="result" style="align-items: center;"></div>
+			<script>
+				let showBinaries = false;
+				//Clear previous calculations results
+				function Reset() {
+					document.getElementById('ResultsHeader').innerHTML = '';
+					document.getElementById('result').innerHTML = '';
+					document.getElementById('result').style.visibility = 'hidden'
+				}
+				//toggle between output of information in binary
+				function ToggleShowBinaries() {
+					if (showBinaries == false) {
+						showBinaries = true;
+					} else {
+						showBinaries = false
+					}
+				}
+				//Main execution function
+				function calculateNetwork() {
+					let tmpsubnetMaskInput = document.getElementById('subnetMaskInput').value.split(',');
+					let tmpipInput = document.getElementById('ipInput').value;
+					for (i in tmpsubnetMaskInput) {
+						//               alert(i+' - ' + tmpipInput)
+						tmpipInput = calculateNetworkDetails(tmpipInput, tmpsubnetMaskInput[i])
+					}
+				}
+				//Calculation and output of the the subneting calculations
+				function calculateNetworkDetails(ipInput, subnetMaskInput) {
+					//           const ipInput = document.getElementById('ipInput').value;
+					//           const subnetMaskInput = document.getElementById('subnetMaskInput').value;
+					const ipOctets = ipInput.split('.');
+					subnetMaskOctets = "";
+					if (document.getElementById('Notation').value == "DotedSubnet") {
+						let tmp = subnetMaskInput.split('.');
+						if (tmp[0] >= 0 && tmp[0] < 256 && tmp[1] >= 0 && tmp[1] < 256 && tmp[2] >= 0 && tmp[1] < 256 && tmp[3] >= 0 && tmp[1] < 256) {
+							subnetMaskOctets = subnetMaskInput.split('.');
+						}
+					} else if (document.getElementById('Notation').value == "CIDR" && parseInt(subnetMaskInput) < 31 && parseInt(subnetMaskInput) > 7) {
+						tmpCidr = subnetMaskInput;
+						let tmpSubMask = "1".repeat(tmpCidr) + "0".repeat(32 - tmpCidr)
+						tmpSubMask = tmpSubMask.substr(0, 8) + "." + tmpSubMask.substr(8, 8) + "." + tmpSubMask.substr(16, 8) + "." + tmpSubMask.substr(24, 8);
+						subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
+					} else if (document.getElementById('Notation').value == "NHostsNeeded" && Math.ceil(Math.log2(Number(subnetMaskInput) + 2)) < 25 && parseInt(subnetMaskInput) > 0) {
+						tmpCidr = Math.ceil(Math.log2(Number(subnetMaskInput) + 2));
+						let tmpSubMask = "1".repeat(32 - tmpCidr) + "0".repeat(tmpCidr)
+						tmpSubMask = tmpSubMask.substr(0, 8) + "." + tmpSubMask.substr(8, 8) + "." + tmpSubMask.substr(16, 8) + "." + tmpSubMask.substr(24, 8);
+						subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
+					}
+					if (ipOctets.length !== 4 || subnetMaskOctets.length !== 4) {
+						document.getElementById('result').style.visibility = "visible"
+						document.getElementById('result').innerHTML += 'Invalid input < br > ';
+						return;
+					}
+					// Convert IP address and subnet mask to binary
+					const ipBinary = ipOctets.map(octet => parseInt(octet).toString(2).padStart(8, '0')).join('.');
+					const subnetMaskBinary = subnetMaskOctets.map(octet => parseInt(octet).toString(2).padStart(8, '0')).join('.');
+					// Calculate Network IP
+					function compareDottedBinary(binary1, binary2) {
+						// Split the binary strings into octets
+						const octets1 = binary1.split('.');
+						const octets2 = binary2.split('.');
+						if (octets1.length !== 4 || octets2.length !== 4) {
+							return 'Invalid input';
+						}
+						// Initialize an array to store the result
+						const resultOctets = [];
+						// Perform bitwise AND for each octet and store the result
+						for (let i = 0; i < 4; i++) {
+							const octet1 = parseInt(octets1[i], 2);
+							const octet2 = parseInt(octets2[i], 2);
+							if (isNaN(octet1) || isNaN(octet2)) {
+								return 'Invalid input';
+							}
+							const resultOctet = octet1 & octet2;
+							resultOctets.push(resultOctet.toString(2).padStart(8, '0'));
+						}
+						// Combine the result octets into a dotted binary string
+						const resultBinary = resultOctets.join('.');
+						return resultBinary;
+					}
+					// Calculate First Available Host IP
+					const networkIPBinary = compareDottedBinary(ipBinary, subnetMaskBinary)
+					const networkIPDecimal = networkIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+					// Calculate First Available Host IP
+					const firstHostIPBinary = networkIPBinary.substring(0, networkIPBinary.length - 1) + '1';
+					const firstHostIPDecimal = firstHostIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+
+					function countTrailingZeros(mask) {
+						// Split the mask into octets
+						const octets = mask.split('.');
+						// Initialize a variable to store the count of trailing zeros
+						let count = 0;
+						// Iterate through each octet in reverse order
+						for (let i = octets.length - 1; i >= 0; i--) {
+							const binaryOctet = octets[i];
+							// Count the trailing zeros in the binary octet
+							for (let j = binaryOctet.length - 1; j >= 0; j--) {
+								if (binaryOctet[j] === '0') {
+									count++;
+								} else {
+									// If a non-zero bit is encountered, stop counting
+									break;
+								}
+							}
+							// If there are non-zero bits in the octet, stop counting
+							if (count === 0) {
+								break;
+							}
+						}
+						return count;
+					}
+					const subnetSize = countTrailingZeros(subnetMaskBinary);
+
+					function replaceTrailingZerosWithOnes(ipAddress, trailingZerosCount) {
+						const trail1s = "1".repeat(trailingZerosCount)
+						str = ipAddress.replace(/\./g, "").substring(0, 32 - trailingZerosCount) + trail1s
+						resultBinary = str.substr(0, 8) + "." + str.substr(8, 8) + "." + str.substr(16, 8) + "." + str.substr(24, 8);
+						return resultBinary;
+					}
+					// Calculate Network Broadcast IP
+					const broadcastIPBinary = replaceTrailingZerosWithOnes(networkIPBinary, subnetSize);
+					const broadcastIPDecimal = broadcastIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+					// Calculate Last Available Host IP
+					const lastHostIPBinary = broadcastIPBinary.substring(0, networkIPBinary.length - 1) + '0';
+					const lastHostIPDecimal = lastHostIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+					// Calculate Total Number of IPs Available for Assignment
+					const totalIPs = Math.pow(2, subnetSize) - 2;
+					// Output
+					document.getElementById('ResultsHeader').innerText = "Results"
+					document.getElementById('result').style.visibility = "visible"
+					if (showBinaries == true) {
+						document.getElementById('result').innerHTML += `
+                        <center> <table style="font-family: monospace;">
+                            <tr><td>======================</td><td>===================================</td></tr>
+                            <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
+                            <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
+                            <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
+                            <tr><td>======================</td><td>===================================</td></tr>
+                        </table><br><br>`}
             
-            if (document.getElementById('Notation').value=="DotedSubnet"){
-
-                let tmp= subnetMaskInput.split('.');
-                if( tmp[0]>=0 && tmp[0]<256 &&
-                    tmp[1]>=0 && tmp[1]<256 &&
-                    tmp[2]>=0 && tmp[1]<256 &&
-                    tmp[3]>=0 && tmp[1]<256
-                    ){
-                        subnetMaskOctets = subnetMaskInput.split('.');
-                    }
-
-            } else if (document.getElementById('Notation').value=="CIDR" && parseInt(subnetMaskInput)<31 && parseInt(subnetMaskInput)>7){        
-
-                    tmpCidr = subnetMaskInput;
-                    let tmpSubMask="1".repeat(tmpCidr)+"0".repeat(32-tmpCidr)
-                    tmpSubMask=tmpSubMask.substr(0,8)+"."+tmpSubMask.substr(8,8)+"."+tmpSubMask.substr(16,8)+"."+tmpSubMask.substr(24,8);
-                    subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
-
-            } else if (document.getElementById('Notation').value=="NHostsNeeded" && Math.ceil(Math.log2(Number(subnetMaskInput)+2))<25 && parseInt(subnetMaskInput)>0){        
-
-                    tmpCidr = Math.ceil(Math.log2(Number(subnetMaskInput)+2));
-                    let tmpSubMask="1".repeat(32-tmpCidr)+"0".repeat(tmpCidr)
-                    tmpSubMask=tmpSubMask.substr(0,8)+"."+tmpSubMask.substr(8,8)+"."+tmpSubMask.substr(16,8)+"."+tmpSubMask.substr(24,8);
-                    subnetMaskOctets = tmpSubMask.split('.').map(octet => parseInt(octet, 2));
-
-            }
-
-
-            if (ipOctets.length !== 4 || subnetMaskOctets.length !== 4) {
-                document.getElementById('result').style.visibility="visible"
-                document.getElementById('result').innerHTML += 'Invalid input<br>';
-                return;
-            }
-
-            // Convert IP address and subnet mask to binary
-            const ipBinary = ipOctets.map(octet => parseInt(octet).toString(2).padStart(8, '0')).join('.');
-            const subnetMaskBinary = subnetMaskOctets.map(octet => parseInt(octet).toString(2).padStart(8, '0')).join('.');
-
-            // Calculate Network IP
-            function compareDottedBinary(binary1, binary2) {
-                // Split the binary strings into octets
-                const octets1 = binary1.split('.');
-                const octets2 = binary2.split('.');
-
-                if (octets1.length !== 4 || octets2.length !== 4) {
-                    return 'Invalid input';
-                }
-
-                // Initialize an array to store the result
-                const resultOctets = [];
-
-                // Perform bitwise AND for each octet and store the result
-                for (let i = 0; i < 4; i++) {
-                    const octet1 = parseInt(octets1[i], 2);
-                    const octet2 = parseInt(octets2[i], 2);
-
-                    if (isNaN(octet1) || isNaN(octet2)) {
-                        return 'Invalid input';
-                    }
-
-                    const resultOctet = octet1 & octet2;
-                    resultOctets.push(resultOctet.toString(2).padStart(8, '0'));
-                }
-
-                // Combine the result octets into a dotted binary string
-                const resultBinary = resultOctets.join('.');
-
-                return resultBinary;
-            }
-                
-            const networkIPBinary = compareDottedBinary(ipBinary,subnetMaskBinary)
-            const networkIPDecimal = networkIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
-
-            // Calculate First Available Host IP
-            const firstHostIPBinary = networkIPBinary.substring(0, networkIPBinary.length - 1) + '1';
-            const firstHostIPDecimal = firstHostIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
-
-            function countTrailingZeros(mask) {
-                // Split the mask into octets
-                const octets = mask.split('.');
-
-                // Initialize a variable to store the count of trailing zeros
-                let count = 0;
-
-                // Iterate through each octet in reverse order
-                for (let i = octets.length - 1; i >= 0; i--) {
-                    const binaryOctet = octets[i];
-
-                    // Count the trailing zeros in the binary octet
-                    for (let j = binaryOctet.length - 1; j >= 0; j--) {
-                        if (binaryOctet[j] === '0') {
-                            count++;
-                        } else {
-                            // If a non-zero bit is encountered, stop counting
-                            break;
-                        }
-                    }
-
-                    // If there are non-zero bits in the octet, stop counting
-                    if (count === 0) {
-                        break;
-                    }
-                }
-
-                return count;
-            }
-
-            const subnetSize = countTrailingZeros(subnetMaskBinary);
-
-
-            function replaceTrailingZerosWithOnes(ipAddress, trailingZerosCount) {
-                const trail1s ="1".repeat(trailingZerosCount)
-                 str = ipAddress.replace(/\./g, "").substring(0, 32-trailingZerosCount)+trail1s
-                resultBinary = str.substr(0,8)+"."+str.substr(8,8)+"."+str.substr(16,8)+"."+str.substr(24,8);
-            return resultBinary;
-}
-
-           // Calculate Network Broadcast IP
-            const broadcastIPBinary = replaceTrailingZerosWithOnes(networkIPBinary,subnetSize);
-            const broadcastIPDecimal = broadcastIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
- 
-           // Calculate Last Available Host IP
-            const lastHostIPBinary = broadcastIPBinary.substring(0, networkIPBinary.length - 1) + '0';
-            const lastHostIPDecimal = lastHostIPBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
-
- 
-            // Calculate Total Number of IPs Available for Assignment
-            const totalIPs = Math.pow(2,subnetSize)-2;
-
-            // Output
-            document.getElementById('ResultsHeader').innerText="Results"
-            document.getElementById('result').style.visibility="visible"
-            if(showBinaries==true){
-                document.getElementById('result').innerHTML += `
-                      <center> <table style="font-family: monospace;">
-                        <tr><td>======================</td><td>===================================</td></tr>
-                        <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
-                        <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
-                        <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
-                        <tr><td>======================</td><td>===================================</td></tr>
-                    </table><br><br>
-                `
-            }
-            
-            document.getElementById('result').innerHTML += `
-                <center><table>
-                    <tr><td>Network IP in Decimal:</td><td>${networkIPDecimal}</td></tr>
-                    <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')}</td></tr>
-                    <tr><td>First Available Host IP in Decimal:</td><td>${firstHostIPDecimal}</td></tr>
-                    <tr><td>Last Available Host IP in Decimal:</td><td>${lastHostIPDecimal}</td></tr>
-                    <tr><td>Network Broadcast IP in Decimal:</td><td>${broadcastIPDecimal}</td></tr>
-                    <tr><td>Total Number of hosts bits:</td><td>${subnetSize}</td></tr>
-                    <tr><td>Total Number of IPs Available for Assignment:</td><td>${totalIPs}</td></tr>
-                </table><br><br>
-            `;
+                    document.getElementById('result').innerHTML += `
+                        <center><table>
+                            <tr><td>Network IP in Decimal:</td><td>${networkIPDecimal}</td></tr>
+                            <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')}</td></tr>
+                            <tr><td>First Available Host IP in Decimal:</td><td>${firstHostIPDecimal}</td></tr>
+                            <tr><td>Last Available Host IP in Decimal:</td><td>${lastHostIPDecimal}</td></tr>
+                            <tr><td>Network Broadcast IP in Decimal:</td><td>${broadcastIPDecimal}</td></tr>
+                            <tr><td>Total Number of hosts bits:</td><td>${subnetSize}</td></tr>
+                            <tr><td>Total Number of IPs Available for Assignment:</td><td>${totalIPs}</td></tr>
+                        </table><br><br>`;
         
-            tmpnextNetworkIp = eval(parseInt(broadcastIPBinary.replace(/\./g,""), 2)+1);
-            tmpnextNetworkIp = tmpnextNetworkIp.toString(2)
-            NextNetworkIpBinary = tmpnextNetworkIp.substr(0,8)+"."+tmpnextNetworkIp.substr(8,8)+"."+tmpnextNetworkIp.substr(16,8)+"."+tmpnextNetworkIp.substr(24,8);
-            NextNetworkIpDecimal = NextNetworkIpBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
-
-            return NextNetworkIpDecimal
-        }
-
-
-        function printResults() {
-            // Get the div element by its ID
-            var divElement = document.getElementById("result");
-
-            if (divElement) {
-                // Get the outerHTML of the div element
-                var outerHTML = divElement.outerHTML;
-
-                // Create a new window and set its content to the outerHTML
-                var printWindow = window.open('', '', 'width=600,height=400');
-                printWindow.document.open();
-                printWindow.document.write(outerHTML);
-                printWindow.document.title = "SubNeting Details"
-                printWindow.document.close();
-
-                // Trigger the print dialog for the new window
-                printWindow.print();
-                printWindow.close();
-            } else {
-                alert("Something went wrong.");
-            }
-        }
-
-    </script>
-    </center>
-</body>
+					//Calculation of next free network ip for VLSN iteration
+					tmpnextNetworkIp = eval(parseInt(broadcastIPBinary.replace(/\./g, ""), 2) + 1);
+					tmpnextNetworkIp = tmpnextNetworkIp.toString(2)
+					NextNetworkIpBinary = tmpnextNetworkIp.substr(0, 8) + "." + tmpnextNetworkIp.substr(8, 8) + "." + tmpnextNetworkIp.substr(16, 8) + "." + tmpnextNetworkIp.substr(24, 8);
+					NextNetworkIpDecimal = NextNetworkIpBinary.split('.').map(octet => parseInt(octet, 2)).join('.');
+					return NextNetworkIpDecimal
+				}
+				//Create output for printer
+				function printResults() {
+					// Get the div element by its ID
+					var divElement = document.getElementById("result");
+					if (divElement) {
+						// Get the outerHTML of the div element
+						var outerHTML = divElement.outerHTML;
+						// Create a new window and set its content to the outerHTML
+						var printWindow = window.open('', '', 'width=600,height=400');
+						printWindow.document.open();
+						printWindow.document.write(outerHTML);
+						printWindow.document.title = "SubNeting Details"
+						printWindow.document.close();
+						// Trigger the print dialog for the new window
+						printWindow.print();
+						printWindow.close();
+					} else {
+						alert("Something went wrong.");
+					}
+				}
+			</script>
+		</center>
+	</body>
 </html>
