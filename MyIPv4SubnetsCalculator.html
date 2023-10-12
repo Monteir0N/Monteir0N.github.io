@@ -105,6 +105,7 @@
 					</td>
 				</tr>
 			</table>
+		</center>
 			<p>Enter an IP address and a subnet mask to calculate network details:</p>
 			<label for="ipInput">IP Address:</label>
 			<input type="text" id="ipInput" placeholder="Enter IP address" value="198.168.1.1">
@@ -257,15 +258,20 @@
                         <center> <table style="font-family: monospace;">
                             <tr><td>======================</td><td>===================================</td></tr>
                             <tr><td>IP Address in Binary:</td><td>${ipBinary}</td></tr>
+							<tr><td> </td><td></td></tr>
                             <tr><td>Subnet Mask in Binary:</td><td>${subnetMaskBinary}</td></tr>
                             <tr><td>Network IP in Binary:</td><td>${networkIPBinary}</td></tr>
+							<tr><td> </td><td></td></tr>
+							<tr><td>First Host in Binary:</td><td>${firstHostIPBinary}</td></tr>
+							<tr><td>Last Host in Binary:</td><td>${lastHostIPBinary}</td></tr>
+							<tr><td>Broadcast IP in Binary:</td><td>${broadcastIPBinary}</td></tr>
                             <tr><td>======================</td><td>===================================</td></tr>
                         </table><br><br>`}
             
                     document.getElementById('result').innerHTML += `
                         <center><table>
                             <tr><td>Network IP in Decimal:</td><td>${networkIPDecimal}</td></tr>
-                            <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')}</td></tr>
+                            <tr><td>Subnet Mask :</td><td>${subnetMaskBinary.split('.').map(octet => parseInt(octet, 2)).join('.')} /${32-subnetSize}</td></tr>
                             <tr><td>First Available Host IP in Decimal:</td><td>${firstHostIPDecimal}</td></tr>
                             <tr><td>Last Available Host IP in Decimal:</td><td>${lastHostIPDecimal}</td></tr>
                             <tr><td>Network Broadcast IP in Decimal:</td><td>${broadcastIPDecimal}</td></tr>
