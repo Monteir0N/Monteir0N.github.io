@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+body {
+background-color: #111;
+color: #1289d8;
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 0;
+}
+
+h1 {
+font-size: 40px;
+text-align: center;
+}
+
+p {
+width: 90%;
+margin-left: 5%;
+font-size: 18px;
+text-align: center;
+}
+
+label {
+font-size: 16px;
+display: block;
+margin-top: 10px;
+margin-left: 5%;
+}
+
+input[type="text"] {
+width: 85%;
+padding: 10px;
+margin: 5px 0;
+margin-left: 5%;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+/* Add rounded corners */
+}
+
+textarea {
+width: 85%;
+padding: 10px;
+margin: 5px 0;
+margin-left: 5%;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+/* Add rounded corners */
+}
+
+select {
+width: 88%;
+padding: 10px;
+margin: 5px 0;
+margin-left: 5%;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+/* Add rounded corners */
+}
+
+button {
+padding: 10px 20px;
+background-color: #1289d8;
+color: #111;
+border: none;
+cursor: pointer;
+width: 25%;
+max-width: 130px;
+/* Adjust the maximum width as needed */
+border-radius: 10px;
+/* Add rounded corners */
+}
+
+button:hover {
+background-color: #0b1391;
+}
+
+#result {
+width: 85%;
+padding: 10px;
+margin: 5px 0;
+margin-left: 5%;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+margin-top: 20px;
+visibility: hidden
+}
+
+#ResultsHeader {
+text-align: center;
+margin-top: 20px;
+}
+
+input[type="checkbox"] {
+margin-right: 5px;
+}
+</style>
+</head>
+<body>
+<h1>Site-to-Site IPsec VPN using IKEV1<br>Configuration Script Generator</h1>
+
+<table width="100%">
+    <tr>
+        <td><center><h2>Site 1</h2></center></td>
+        <td><center><h2>Site 2</h2></center></td>
+    </tr>
+    
+    <tr>
+        <td>
+            <label for="Site1IP">Public IP:</label>
+            <input type="text" id="Site1IP" placeholder="Site 1 Public IP Address" value="200.100.100.5">
+        </td>
+        <td>
+            <label for="Site1IP">Public IP:</label>
+           <input type="text" id="Site2IP" placeholder="Site 2 Public IP Address" value="209.123.232.123">
+        </td>
+    </tr>
+ 
+    <tr>
+        <td>
+           <label for="Site1OutsideID">Ouside interface name:</label>
+           <input type="text" id="Site1OutsideID" placeholder="OUTSIDE" value="Outside1">
+        </td>
+        <td>
+            <label for="Site2OutsideID">Ouside interface name:</label>
+            <input type="text" id="Site2OutsideID" placeholder="OUTSIDE" value="Outside2">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <label for="Site1Lans">Lans in Site:</label>
+            <textarea id="Site1Lans" name="w3review" rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
+10.10.0.0 255.255.0.0">192.168.0.0 255.255.255.0
+10.10.0.0 255.255.0.0</textarea>
+        </td>
+        <td>
+            <label for="Site2Lans">Lans in Site:</label>
+
+            <textarea id="Site2Lans" name="w3review" rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
+10.10.0.0 255.255.0.0">172.16.0.0 255.255.255.0
+10.20.0.0 255.255.0.0</textarea>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+           <label for="PreSharedKey">Pre-Shared Key for Vpn Tunnel:</label>
+           <input type="text" id="PreSharedKey" placeholder="Cisco123" value="Cisco123">
+        </td>
+    </tr>
+
+</table>
+
+<center>
+<button onclick="GenerateScript()">Generate</button>
+<button onclick="Reset()">Reset</button>
+<button onclick="printResults()">Print Results</button>
+<button onclick="navigator.clipboard.writeText(document.getElementById('result').innerText);alert('Config Script Copied to Clipboard')">Copy2ClipBoard</button>
+<br>
+</center>
+
+<h1 id="ResultsHeader"></h1>
+<div id="result" style="align-items: center;">
+    <center><table>
+        <tr>
+            <td><center><h2>Site 1</h2></center></td>
+            <td><center><h2>Site 2</h2></center></td>
+        </tr>
+        <tr>
+            <td id="OutPut1"></td>
+            <td id="OutPut2"></td>
+        </tr>
+    
+    </table></div>
+
+<script>
+
+//Clear results
+function Reset() {
+document.getElementById('ResultsHeader').innerHTML = '';
+document.getElementById('OutPut1').innerText = '';
+document.getElementById('OutPut2').innerText = '';
+document.getElementById('result').style.visibility = 'hidden'
+}
+
+//Create output for printer
+function printResults() {
+// Get the div element by its ID
+var divElement = document.getElementById("result");
+if (divElement) {
+// Get the outerHTML of the div element
+var outerHTML = divElement.outerHTML;
+// Create a new window and set its content to the outerHTML
+var printWindow = window.open('', '', 'width=600,height=400');
+printWindow.document.open();
+printWindow.document.write(outerHTML);
+printWindow.document.title = ''
+printWindow.document.close();
+// Trigger the print dialog for the new window
+printWindow.print();
+printWindow.close();
+} else {
+alert("Something went wrong.");
+}
+}
+
+//Main execution function
+function GenerateScript() {
+
+    let Site1_Ip = document.getElementById('Site1IP').value;   
+    let Site2_Ip = document.getElementById('Site2IP').value;
+    let Site1_NameIF = document.getElementById('Site1OutsideID').value;
+    let Site2_NameIF = document.getElementById('Site2OutsideID').value;
+    let Site1_Lans = document.getElementById('Site1Lans').value.split('\n');
+    let Site2_Lans = document.getElementById('Site2Lans').value.split('\n');
+    let S2S_PreSharedKey = document.getElementById('PreSharedKey').value;
+
+    //Generate ACLs
+    let Site1_ACLs = '';
+    for (let a=0; a < Site1_Lans.length ; a++) {
+        for (let b=0; b < Site2_Lans.length ; b++) {
+            Site1_ACLs += `
+access-list VPN-ACL permit Ip ${Site1_Lans[a]} ${Site2_Lans[b]} `
+        }
+    }
+
+    let Site2_ACLs = '';
+    for (let a=0; a < Site2_Lans.length ; a++) {
+        for (let b=0; b < Site1_Lans.length ; b++) {
+            Site2_ACLs += `
+access-list VPN-ACL permit Ip ${Site2_Lans[a]} ${Site1_Lans[b]} `
+        }
+    }
+
+    document.getElementById('result').style.visibility = "visible";
+    document.getElementById('OutPut1').innerText += `
+    
+!Configure site-to-site IPsec VPN using IKEV1
+!Step 1:- Create Crypto Ikev1 Policy
+
+ crypto ikev1 policy 10
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 86400
+ encryption 3des
+
+
+!Step 2:- Create A Tunnel-Group To Specify A Pre-Shared Key For Peer
+
+!Step 2.1:- Create tunnel-group
+
+tunnel-group ${Site2_Ip} type IPsec-l2l
+
+
+!Step 2.2:- Specify pre-shared key in tunnel-group
+
+tunnel-group ${Site2_Ip} IPsec-attributes
+ikev1 pre-shared-key ${S2S_PreSharedKey}
+
+
+!Step 3:- Create IPsec Transform-Set
+
+crypto ipsec ikev1 transform-set TSET esp-3des esp-sha-hmac
+
+
+!Step 4:- Define Interesting Traffic ACCESS-LIST
+${Site1_ACLs}
+
+!Step 5:- Create A Crypto Map
+
+crypto map CMAP 10 set peer ${Site2_Ip}
+crypto map CMAP 10 set ikev1 transform-set TSET
+crypto map CMAP 10 match address VPN-ACL
+
+
+!Step 6:- Enable IKEV1 And Apply Crypto Map On The Interface
+
+crypto map CMAP interface ${Site1_NameIF}
+crypto ikev1 enable ${Site1_NameIF}
+
+ 
+`;
+
+document.getElementById('OutPut2').innerText += `
+    
+!Configure site-to-site IPsec VPN using IKEV1
+!Step 1:- Create Crypto Ikev1 Policy
+   
+crypto ikev1 policy 10
+hash sha
+authentication pre-share
+group 2
+lifetime 86400
+encryption 3des
+    
+    
+!Step 2:- Create A Tunnel-Group To Specify A Pre-Shared Key For Peer
+    
+!Step 2.1:- Create tunnel-group
+    
+tunnel-group ${Site1_Ip} type IPsec-l2l
+    
+    
+!Step 2.2:- Specify pre-shared key in tunnel-group
+    
+tunnel-group ${Site1_Ip} IPsec-attributes
+ikev1 pre-shared-key ${S2S_PreSharedKey}
+    
+    
+!Step 3:- Create IPsec Transform-Set
+    
+crypto ipsec ikev1 transform-set TSET esp-3des esp-sha-hmac
+    
+    
+!Step 4:- Define Interesting Traffic ACCESS-LIST
+${Site2_ACLs}
+   
+!Step 5:- Create A Crypto Map
+   
+crypto map CMAP 10 set peer ${Site1_Ip}
+crypto map CMAP 10 set ikev1 transform-set TSET
+crypto map CMAP 10 match address VPN-ACL
+    
+  
+!Step 6:- Enable IKEV1 And Apply Crypto Map On The Interface
+
+crypto map CMAP interface ${Site2_NameIF}
+crypto ikev1 enable ${Site2_NameIF}
+ 
+     
+`
+    
+
+}
+
+
+
+</script>
+
+
+</body></html>
