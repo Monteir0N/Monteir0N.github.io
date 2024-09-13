@@ -33,9 +33,9 @@ width: 85%;
 padding: 10px;
 margin: 5px 0;
 margin-left: 5%;
-border: 2px solid #1289d8;
 background-color: #222;
 color: #1289d8;
+border: 2px solid #1289d8;
 border-radius: 10px;
 /* Add rounded corners */
 }
@@ -94,6 +94,28 @@ margin-top: 20px;
 visibility: hidden
 }
 
+#Phase1Table {
+width: 95%;
+padding: 10px;
+margin: 5px 0;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+margin-top: 5px;
+}
+
+#Phase2Table {
+width: 95%;
+padding: 10px;
+margin: 5px 0;
+border: 2px solid #1289d8;
+background-color: #222;
+color: #1289d8;
+border-radius: 10px;
+margin-top: 5px;
+}
+
 #ResultsHeader {
 text-align: center;
 margin-top: 20px;
@@ -106,6 +128,7 @@ margin-right: 5px;
 </head>
 <body>
 <h1>Site-to-Site IPsec VPN using IKEV1<br>Configuration Script Generator</h1>
+<center>
 
 <table width="100%">
     <tr>
@@ -138,29 +161,90 @@ margin-right: 5px;
     <tr>
         <td>
             <label for="Site1Lans">Lans in Site:</label>
-            <textarea id="Site1Lans" name="w3review" rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
+            <textarea id="Site1Lans" rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
 10.10.0.0 255.255.0.0">192.168.0.0 255.255.255.0
 10.10.0.0 255.255.0.0</textarea>
         </td>
         <td>
             <label for="Site2Lans">Lans in Site:</label>
 
-            <textarea id="Site2Lans" name="w3review" rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
+            <textarea id="Site2Lans"rows="4" cols="50" placeholder="192.168.0.0 255.255.255.0
 10.10.0.0 255.255.0.0">172.16.0.0 255.255.255.0
 10.20.0.0 255.255.0.0</textarea>
         </td>
     </tr>
+</table>
+</center>
 
+<label for="Phase1Table">Phase1:</label>
+<center>
+<table id="Phase1Table" width="100%">
     <tr>
         <td>
-           <label for="PreSharedKey">Pre-Shared Key for Vpn Tunnel:</label>
-           <input type="text" id="PreSharedKey" placeholder="Cisco123" value="Cisco123">
+            <label for="PreSharedKey">Pre-Shared Key for Vpn Tunnel:</label>
+            <input type="text" id="PreSharedKey" placeholder="Cisco123" value="Cisco123">
+            <label for="HashAlgorithm">Hash type for inicial connection:</label>
+			<select id="HashAlgorithm">
+				<option value="sha 256">SHA 256</option>
+				<option value="sha 256">SHA 192</option>
+				<option value="sha 256">SHA 128</option>
+				<option value="md5">MD5</option>
+			</select>
+        </td>
+        <td>
+            <label for="Group">Diffie-Hellman Group:</label>
+			<select id="Group">
+				<option value="5">Group 5: 1536 bits</option>
+				<option value="2">Group 2: 1024 bits</option>
+				<option value="1">Group 1: 768 bits</option>
+			</select>
+            <label for="encryption">Encryption type for inicial connection:</label>
+			<select id="encryption">
+                <option value="aes 256">aes-256 encryption</option>                
+                <option value="aes 192">aes-192 encryption</option>
+                <option value="aes 128">aes-128 encryption</option>
+                <option value="3des">3des encryption</option>
+                <option value="des">des encryption</option>
+            </select>
+
         </td>
     </tr>
-
 </table>
+</center>
+<br>
 
+<label for="Phase2Table">Phase2:</label>
 <center>
+<table  id="Phase2Table">    
+    <tr>
+        <td width="33%">
+            <label for="AHTransf">AH Transform:</label>
+            <select id="AHTransf">
+                <option value=""></option>
+                <option value="ah-sha-hmac">ah-sha-hmac</option>
+                <option value="ah-md5-hmac">ah-md5-hmac</option>
+             </select>
+        </td>
+        <td  width="33%">
+            <label for="ESPEncrypTrans">ESP Encryption Transform:</label>
+            <select id="ESPEncrypTrans">
+            <option value="esp-aes 256">esp-aes 256</option>
+            <option value="esp-aes 192">esp-aes 192</option>
+            <option value="esp-aes">esp-aes</option>
+            <option value="esp-md5-hmac">esp-3des</option>
+            <option value="esp-des">esp-des</option>
+            </select>
+        </td>
+        <td  width="33%">
+            <label for="ESPAuthTrans">ESP Authentication Transform:</label>
+            <select id="ESPAuthTrans">
+            <option value="esp-sha-hmac">esp-sha-hmac</option>
+            <option value="esp-md5-hmac">esp-md5-hmac</option>
+            </select>
+        </td>
+        </tr>
+</table>
+<br>
 <button onclick="GenerateScript()">Generate</button>
 <button onclick="Reset()">Reset</button>
 <button onclick="printResults()">Print Results</button>
@@ -248,11 +332,11 @@ access-list VPN-ACL permit Ip ${Site2_Lans[a]} ${Site1_Lans[b]} `
 !Step 1:- Create Crypto Ikev1 Policy
 
  crypto ikev1 policy 10
- hash sha
+ hash ${document.getElementById('HashAlgorithm').value}
  authentication pre-share
- group 2
+ group ${document.getElementById('Group').value}
  lifetime 86400
- encryption 3des
+ encryption ${document.getElementById('encryption').value}
 
 
 !Step 2:- Create A Tunnel-Group To Specify A Pre-Shared Key For Peer
@@ -270,7 +354,7 @@ ikev1 pre-shared-key ${S2S_PreSharedKey}
 
 !Step 3:- Create IPsec Transform-Set
 
-crypto ipsec ikev1 transform-set TSET esp-3des esp-sha-hmac
+crypto ipsec ikev1 transform-set TSET ${document.getElementById('AHTransf').value} ${document.getElementById('ESPEncrypTrans').value} ${document.getElementById('ESPAuthTrans').value} 
 
 
 !Step 4:- Define Interesting Traffic ACCESS-LIST
@@ -297,11 +381,12 @@ document.getElementById('OutPut2').innerText += `
 !Step 1:- Create Crypto Ikev1 Policy
    
 crypto ikev1 policy 10
-hash sha
+hash ${document.getElementById('HashAlgorithm').value}
 authentication pre-share
-group 2
+group ${document.getElementById('Group').value}
 lifetime 86400
-encryption 3des
+encryption ${document.getElementById('encryption').value}
+
     
     
 !Step 2:- Create A Tunnel-Group To Specify A Pre-Shared Key For Peer
@@ -319,7 +404,7 @@ ikev1 pre-shared-key ${S2S_PreSharedKey}
     
 !Step 3:- Create IPsec Transform-Set
     
-crypto ipsec ikev1 transform-set TSET esp-3des esp-sha-hmac
+crypto ipsec ikev1 transform-set TSET ${document.getElementById('AHTransf').value} ${document.getElementById('ESPEncrypTrans').value} ${document.getElementById('ESPAuthTrans').value} 
     
     
 !Step 4:- Define Interesting Traffic ACCESS-LIST
