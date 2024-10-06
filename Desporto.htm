@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Channels</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .menu {
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: #111;
+            overflow-y: auto;
+            padding-top: 20px;
+        }
+        .menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .menu li {
+            padding: 8px;
+            text-align: left;
+        }
+        .menu a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .menu a:hover {
+            background-color: #575757;
+        }
+        .submenu {
+            display: none;
+            margin-left: 20px;
+        }
+        .menu li:hover .submenu {
+            display: block;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 80vh;
+            border: none;
+        }
+    </style>
+    <script>
+        function loadStream(url) {
+            document.getElementById("stream-frame").src = url;
+        }
+    </script>
+</head>
+<body>
+
+    <div class="menu">
+        <ul>
+            <li>
+                <a href="#">SportTV 1</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2521')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/sporttv1.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/sport1pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">SportTV 2</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2522')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/sporttv2.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/sport2pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">SportTV 3</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2523')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/sporttv3.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/sport3pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">SportTV 4</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2524')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/sporttv4.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/sport4pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <!-- Add more channels following the same structure -->
+            <li>
+                <a href="#">Eurosport 1</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2528')">Source 1</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">Eurosport 2</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2529')">Source 1</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">BTV</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2531')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/btv.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/benficatv.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">SportingTV</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2532')">Source 1</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 1</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2533')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/eleven1.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn1pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 2</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2534')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/eleven2.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn2pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 3</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2535')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://sportsonline.si/channels/pt/eleven3.php')">Source 2</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn3pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 4</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2536')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn4pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 5</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2537')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn5pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">ElevenSports 6</a>
+                <ul class="submenu">
+                    <li><a href="#" onclick="loadStream('https://365game.stream/main/2538')">Source 1</a></li>
+                    <li><a href="#" onclick="loadStream('https://antenasport.online/dazn5pt.php')">Source 3</a></li>
+                </ul>
+            </li>
+            <!-- Continue adding more channels with their respective sources -->
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2>Choose a stream from the menu</h2>
+        <iframe id="stream-frame" src=""></iframe>
+    </div>
+
+</body>
+</html>
