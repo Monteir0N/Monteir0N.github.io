@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Checker</title>
+    <style>
+        body {
+            background-color: white;
+            transition: background-color 0.5s ease;
+        }
+        #ipDisplay {
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Public IP:</h1>
+    <p id="ipDisplay">Fetching...</p>
+
+    <script>
+        let previousIP = "";
+
+        function fetchIP() {
+            fetch('https://api.ipify.org/?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    const currentIP = data.ip;
+                    document.getElementById('ipDisplay').textContent = currentIP;
+
+                    if (previousIP && previousIP !== currentIP) {
+                        document.body.style.backgroundColor = 'red';
+                    } else {
+                        document.body.style.backgroundColor = 'white';
+                    }
+
+                    previousIP = currentIP;
+                })
+                .catch(error => console.error('Error fetching IP:', error));
+        }
+
+        // Fetch IP every 30 seconds
+        fetchIP();
+        setInterval(fetchIP, 30000);
+    </script>
+</body>
+</html>
