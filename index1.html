@@ -62,10 +62,9 @@
 (() => {
   "use strict";
 
-  // Acesso direto ao GEIL.TO. Isto só funciona se o site permitir CORS
-  // para páginas alojadas noutros domínios (como GitHub Pages).
-  const CATALOG_URL = "https://www.geil.to/live/catalog/live/channels.json?&&filter%5Bgroup%5D=Portugal";
-  const RESOLVER_URL = "https://www.geil.to/live/resolve?url=";
+// Cloudflare Worker API
+const API_BASE = "https://dual-player-api.monteiro-n.workers.dev";
+const CATALOG_URL = `${API_BASE}/api/catalog`;
 
   const els = {
     filter: document.getElementById("filter"),
@@ -103,13 +102,8 @@
     say("A obter catálogo do GEIL.TO…");
     els.refresh.disabled = true;
     try {
-      const response = await fetch(CATALOG_URL, {
-        method: "GET",
-        mode: "cors",
-        credentials: "omit",
-        cache: "no-store"
-      });
-      if (!response.ok) throw new Error(`GEIL.TO respondeu HTTP ${response.status}`);
+      const response = await fetch(CATALOG_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Servidor local respondeu HTTP ${response.status}`);
       const data = await response.json();
       channels = getItems(data).filter(ch => channelId(ch) !== "");
       if (!channels.length) throw new Error("A resposta foi recebida, mas não encontrei canais no campo items.");
@@ -117,10 +111,7 @@
       els.count.textContent = `${channels.length} canais`;
       say(`Catálogo carregado: ${channels.length} canais. Escolhe um canal para cada leitor.`);
     } catch (err) {
-      const detail = err instanceof TypeError
-        ? " O browser pode estar a bloquear o pedido por CORS; nesse caso, o GEIL.TO não permite acesso direto a partir do GitHub Pages."
-        : "";
-      say(`Não foi possível carregar o catálogo: ${err.message}.${detail}`);
+      say(`Não foi possível carregar o catálogo: ${err.message}. Confirma se iniciaste o servidor com node server.js.`);
       els.count.textContent = "Erro no catálogo";
     } finally {
       els.refresh.disabled = false;
@@ -145,15 +136,8 @@
 
   async function resolveStream(ch) {
     const id = String(channelId(ch));
-    const playUrl = `https://geil.to/live/play/${encodeURIComponent(id)}`;
-    const resolverUrl = RESOLVER_URL + encodeURIComponent(playUrl);
-    const response = await fetch(resolverUrl, {
-      method: "GET",
-      mode: "cors",
-      credentials: "omit",
-      cache: "no-store"
-    });
-    if (!response.ok) throw new Error(`GEIL.TO resolver respondeu HTTP ${response.status}`);
+    const response = await fetch(`${API_BASE}/api/resolve?id=${encodeURIComponent(id)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Resolver respondeu HTTP ${response.status}`);
 
     const text = await response.text();
     let data;
@@ -203,10 +187,7 @@
       state.title.textContent = channelLabel(ch);
       say(`${channelLabel(ch)} carregado no leitor ${slot}.`);
     } catch (err) {
-      const detail = err instanceof TypeError
-        ? " Possível bloqueio CORS: o GEIL.TO pode não permitir pedidos diretos a partir do GitHub Pages."
-        : "";
-      say(`Falha no leitor ${slot}: ${err.message}.${detail}`);
+      say(`Falha no leitor ${slot}: ${err.message}`);
     } finally {
       button.disabled = false;
     }
