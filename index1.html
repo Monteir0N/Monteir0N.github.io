@@ -165,6 +165,7 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
     say(`A resolver ${channelLabel(ch)}…`);
     try {
       const streamUrl = await resolveStream(ch);
+      say(streamUrl);
       if (state.hls) { state.hls.destroy(); state.hls = null; }
       state.video.pause();
       state.video.removeAttribute("src");
