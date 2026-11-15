@@ -35,36 +35,55 @@
 </head>
 <body>
 <header>
-  <div><h1>Dual Player</h1><div class="sub">Canais do grupo Portugal · ecrã dividido 50/50</div></div>
+  <div>
+    <h1>Dual Player</h1>
+    <div class="sub">Canais do grupo Portugal · ecrã dividido 50/50</div>
+  </div>
   <div class="sub" id="count">A carregar canais…</div>
 </header>
+
 <section class="toolbar">
   <input id="filter" type="search" placeholder="Pesquisar canal…">
-  <select id="channel1" aria-label="Canal do leitor 1"><option value="">Leitor 1 — escolher canal</option></select>
+  <select id="channel1" aria-label="Canal do leitor 1">
+    <option value="">Leitor 1 — escolher canal</option>
+  </select>
   <button id="play1">Reproduzir 1</button>
-  <select id="channel2" aria-label="Canal do leitor 2"><option value="">Leitor 2 — escolher canal</option></select>
+  <select id="channel2" aria-label="Canal do leitor 2">
+    <option value="">Leitor 2 — escolher canal</option>
+  </select>
   <button id="play2">Reproduzir 2</button>
   <button id="refresh">Atualizar lista</button>
 </section>
+
 <div id="status" role="status">A obter catálogo do GEIL.TO…</div>
+
 <main class="players">
   <section class="player">
-    <div class="player-head"><strong id="title1">Leitor 1</strong><span>50%</span></div>
+    <div class="player-head">
+      <strong id="title1">Leitor 1</strong>
+      <span>50%</span>
+    </div>
     <video id="video1" controls playsinline></video>
   </section>
   <section class="player">
-    <div class="player-head"><strong id="title2">Leitor 2</strong><span>50%</span></div>
+    <div class="player-head">
+      <strong id="title2">Leitor 2</strong>
+      <span>50%</span>
+    </div>
     <video id="video2" controls playsinline></video>
   </section>
 </main>
-<p class="hint">A reprodução depende da disponibilidade dos streams, das permissões de acesso e das políticas do servidor de origem.</p>
+
+<p class="hint">
+  A reprodução depende da disponibilidade dos streams, das permissões de acesso e das políticas do servidor de origem.
+</p>
+
 <script>
 (() => {
   "use strict";
 
-// Cloudflare Worker API
-const API_BASE = "https://dual-player-api.monteiro-n.workers.dev";
-const CATALOG_URL = `${API_BASE}/api/catalog`;
+  const API_BASE = "https://dual-player-api.monteiro-n.workers.dev";
+  const CATALOG_URL = `${API_BASE}/api/catalog`;
 
   const els = {
     filter: document.getElementById("filter"),
@@ -78,12 +97,23 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
   };
 
   let channels = [];
+
   const players = {
-    1: { video: document.getElementById("video1"), title: document.getElementById("title1"), hls: null },
-    2: { video: document.getElementById("video2"), title: document.getElementById("title2"), hls: null }
+    1: {
+      video: document.getElementById("video1"),
+      title: document.getElementById("title1"),
+      hls: null
+    },
+    2: {
+      video: document.getElementById("video2"),
+      title: document.getElementById("title2"),
+      hls: null
+    }
   };
 
-  function say(message) { els.status.textContent = message; }
+  function say(message) {
+    els.status.textContent = message;
+  }
 
   function getItems(data) {
     if (Array.isArray(data)) return data;
@@ -101,17 +131,23 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
   async function loadCatalog() {
     say("A obter catálogo do GEIL.TO…");
     els.refresh.disabled = true;
+
     try {
       const response = await fetch(CATALOG_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Servidor local respondeu HTTP ${response.status}`);
+      if (!response.ok) throw new Error(`Servidor respondeu HTTP ${response.status}`);
+
       const data = await response.json();
       channels = getItems(data).filter(ch => channelId(ch) !== "");
-      if (!channels.length) throw new Error("A resposta foi recebida, mas não encontrei canais no campo items.");
+
+      if (!channels.length) {
+        throw new Error("A resposta foi recebida, mas não encontrei canais.");
+      }
+
       renderOptions();
       els.count.textContent = `${channels.length} canais`;
       say(`Catálogo carregado: ${channels.length} canais. Escolhe um canal para cada leitor.`);
     } catch (err) {
-      say(`Não foi possível carregar o catálogo: ${err.message}. Confirma se iniciaste o servidor com node server.js.`);
+      say(`Não foi possível carregar o catálogo: ${err.message}`);
       els.count.textContent = "Erro no catálogo";
     } finally {
       els.refresh.disabled = false;
@@ -120,37 +156,65 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
 
   function renderOptions() {
     const query = els.filter.value.trim().toLocaleLowerCase("pt");
+
     for (const select of [els.channel1, els.channel2]) {
       const previous = select.value;
-      select.replaceChildren(new Option(select === els.channel1 ? "Leitor 1 — escolher canal" : "Leitor 2 — escolher canal", ""));
+      select.replaceChildren(
+        new Option(
+          select === els.channel1 ? "Leitor 1 — escolher canal" : "Leitor 2 — escolher canal",
+          ""
+        )
+      );
+
       channels
         .filter(ch => channelLabel(ch).toLocaleLowerCase("pt").includes(query))
-        .sort((a,b) => channelLabel(a).localeCompare(channelLabel(b), "pt"))
+        .sort((a, b) => channelLabel(a).localeCompare(channelLabel(b), "pt"))
         .forEach(ch => {
-          const option = new Option(channelLabel(ch), String(channelId(ch)));
-          select.add(option);
+          select.add(new Option(channelLabel(ch), String(channelId(ch))));
         });
-      if ([...select.options].some(o => o.value === previous)) select.value = previous;
+
+      if ([...select.options].some(o => o.value === previous)) {
+        select.value = previous;
+      }
     }
   }
 
   async function resolveStream(ch) {
     const id = String(channelId(ch));
-    const response = await fetch(`${API_BASE}/api/resolve?id=${encodeURIComponent(id)}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Resolver respondeu HTTP ${response.status}`);
+    const response = await fetch(
+      `${API_BASE}/api/resolve?id=${encodeURIComponent(id)}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Resolver respondeu HTTP ${response.status}`);
+    }
 
     const text = await response.text();
     let data;
-    try { data = JSON.parse(text); } catch { data = text.trim(); }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text.trim();
+    }
 
-    const candidate = typeof data === "string" ? data :
-      data?.url || data?.stream || data?.source?.url ||
-      data?.sources?.find(s => s?.url)?.url ||
-      data?.result?.url || data?.result;
+    const candidate =
+      typeof data === "string"
+        ? data
+        : data?.url ||
+          data?.stream ||
+          data?.source?.url ||
+          data?.sources?.find(s => s?.url)?.url ||
+          data?.result?.url ||
+          data?.result;
 
     if (typeof candidate !== "string" || !/^https?:\/\//i.test(candidate)) {
-      throw new Error("O resolver não devolveu um URL de stream reconhecível. Resposta: " + text.slice(0, 250));
+      throw new Error(
+        "O resolver não devolveu um URL de stream reconhecível. Resposta: " +
+          text.slice(0, 250)
+      );
     }
+
     return candidate;
   }
 
@@ -158,36 +222,72 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
     const select = slot === 1 ? els.channel1 : els.channel2;
     const button = slot === 1 ? els.play1 : els.play2;
     const state = players[slot];
+
     const ch = channels.find(c => String(channelId(c)) === select.value);
-    if (!ch) { say(`Escolhe primeiro um canal para o leitor ${slot}.`); return; }
+    if (!ch) {
+      say(`Escolhe primeiro um canal para o leitor ${slot}.`);
+      return;
+    }
 
     button.disabled = true;
     say(`A resolver ${channelLabel(ch)}…`);
+
     try {
       const streamUrl = await resolveStream(ch);
-      if (state.hls) { state.hls.destroy(); state.hls = null; }
+
+      // Destroy previous instance
+      if (state.hls) {
+        state.hls.destroy();
+        state.hls = null;
+      }
       state.video.pause();
       state.video.removeAttribute("src");
       state.video.load();
 
       if (window.Hls && Hls.isSupported() && /\.m3u8($|\?)/i.test(streamUrl)) {
-        state.hls = new Hls({ enableWorker: true });
+        state.hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false
+        });
+
         state.hls.loadSource(streamUrl);
         state.hls.attachMedia(state.video);
+
         state.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          state.video.play().catch(() => say(`Stream carregado no leitor ${slot}. Carrega em Play se o browser bloquear a reprodução automática.`));
+          state.video.play().catch(() => {
+            say(
+              `Stream carregado no leitor ${slot}. Carrega em Play se o browser bloquear a reprodução automática.`
+            );
+          });
         });
+
         state.hls.on(Hls.Events.ERROR, (_, data) => {
-          if (data.fatal) say(`Erro HLS no leitor ${slot}: ${data.details || data.type}. O servidor do stream pode bloquear CORS.${streamUrl}`);
+          if (!data.fatal) return;
+
+          let msg = `Erro HLS no leitor ${slot}: ${data.details || data.type}`;
+
+          if (data.response) {
+            msg += ` (HTTP ${data.response.code})`;
+          }
+
+          if (data.details === "manifestLoadError") {
+            msg += " — possível problema no proxy ou stream indisponível.";
+          }
+
+          say(msg);
+          console.error("HLS error details:", data);
         });
       } else {
+        // Fallback for non-HLS or native HLS (Safari)
         state.video.src = streamUrl;
         await state.video.play();
       }
+
       state.title.textContent = channelLabel(ch);
       say(`${channelLabel(ch)} carregado no leitor ${slot}.`);
     } catch (err) {
       say(`Falha no leitor ${slot}: ${err.message}`);
+      console.error(err);
     } finally {
       button.disabled = false;
     }
@@ -197,8 +297,11 @@ const CATALOG_URL = `${API_BASE}/api/catalog`;
   els.play1.addEventListener("click", () => startPlayer(1));
   els.play2.addEventListener("click", () => startPlayer(2));
   els.refresh.addEventListener("click", loadCatalog);
+
   loadCatalog();
 })();
 </script>
+</body>
+</html>
 </body>
 </html>
