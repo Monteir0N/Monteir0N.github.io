@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onde dá o jogo</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;background:#111;color:#eee}
+h2{border-bottom:1px solid #333;padding-bottom:.3rem;margin-top:2rem}
+.m{display:flex;gap:1rem;align-items:center;padding:.6rem;background:#1b1b1b;border-radius:6px;margin:.4rem 0}
+.t{width:3.5rem;font-weight:bold}
+.i small{display:block;color:#999;margin-top:2px}
+.c{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.c span{background:#1f3d2a;color:#9f9;padding:2px 8px;border-radius:10px;font-size:.85rem}
+button{background:#2a4a7a;color:#fff;border:0;padding:.5rem 1rem;border-radius:6px;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+</style></head><body>
+<h1>Onde dá o jogo</h1>
+<button id="dl" disabled>Download matches.json</button>
+<div id="out">A carregar…</div>
+
+<script>
+const PROXY = "https://mycors.monteiro-n.workers.dev?";
+const BASE = "https://komunicamagazine.com/onde-da-bola/";
+const lisbonDay = d => new Date(d).toLocaleDateString("sv-SE", {timeZone: "Europe/Lisbon"});
+
+const CHANNEL_NAMES = { "SCP.Tv": "Sporting TV" };
+const renameChannel = c => {
+  if (CHANNEL_NAMES[c]) return CHANNEL_NAMES[c];
+  if (/^Benfica[\s.,]*Tv$/i.test(c)) return "BTV";
+  return c.replace(/^Sport\.Tv\s*/i, "Sport Tv ").trim();
+};
+
+async function getMatches(url) {
+  const html = await (await fetch(PROXY + url)).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const ld = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+  const events = ld.itemListElement;
+
+  const rows = [...doc.querySelectorAll(".g-teams")].map(t => {
+    const row = t.closest("[class*=g-]:has(.g-chan)") || t.parentElement.parentElement;
+    return {
+      comp: (row.querySelector(".g-comp")?.textContent || "").trim(),
+      channels: [...(row.querySelector(".g-chan")?.children || [])].map(c => c.textContent.trim()).filter(Boolean)
+    };
+  });
+
+  return events.map((e, i) => ({
+    match: e.name,
+    start: e.startDate,
+    date: lisbonDay(e.startDate),
+    time: new Date(e.startDate).toLocaleTimeString("pt-PT", {hour: "2-digit", minute: "2-digit", timeZone: "Europe/Lisbon"}),
+    competition: rows[i]?.comp || "",
+    channels: (rows[i]?.channels || []).map(renameChannel)
+  })).filter(m => m.match !== "Vários vs Jogos");
+}
+
+async function getAll() {
+  const [today, tomorrow] = await Promise.all([
+    getMatches(BASE),
+    getMatches(BASE + "?dia=amanha")
+  ]);
+  return { today, tomorrow };
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function render(data) {
+  const out = document.getElementById("out");
+  out.innerHTML = "";
+  for (const [label, list] of [["Hoje", data.today], ["Amanhã", data.tomorrow]]) {
+    let html = `<h2>${label}</h2>`;
+    if (!list.length) html += "<p>Sem jogos.</p>";
+    for (const m of list) {
+      html += `<div class="m"><span class="t">${esc(m.time)}</span>
+        <span class="i">${esc(m.match)}<small>${esc(m.competition)}</small></span>
+        <span class="c">${m.channels.map(c => `<span>${esc(c)}</span>`).join("")}</span></div>`;
+    }
+    out.insertAdjacentHTML("beforeend", html);
+  }
+}
+
+const wantsJson = new URLSearchParams(location.search).get("format") === "json";
+
+getAll().then(data => {
+  if (wantsJson) {
+    document.body.innerHTML = "";
+    const pre = document.createElement("pre");
+    pre.style.cssText = "white-space:pre-wrap;margin:0";
+    pre.textContent = JSON.stringify(data, null, 2);
+    document.body.appendChild(pre);
+    return;
+  }
+  render(data);
+  const btn = document.getElementById("dl");
+  btn.disabled = false;
+  btn.onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: "application/json"}));
+    a.download = "matches.json";
+    a.click();
+  };
+}).catch(err => {
+  document.getElementById("out").textContent = "Erro ao carregar: " + err.message;
+});
+</script>
+</body></html>
