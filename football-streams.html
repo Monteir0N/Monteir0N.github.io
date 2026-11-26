@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onde dá o jogo</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;background:#111;color:#eee}
+h2{border-bottom:1px solid #333;padding-bottom:.3rem;margin-top:2rem}
+.m{display:flex;gap:1rem;align-items:center;padding:.6rem;background:#1b1b1b;border-radius:6px;margin:.4rem 0}
+.t{width:3.5rem;font-weight:bold}
+.i small{display:block;color:#999;margin-top:2px}
+.c{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.c .ch{background:#1f3d2a;color:#9f9;padding:2px 8px;border-radius:10px;font-size:.85rem;display:inline-flex;gap:4px;align-items:center}
+.c .ch.none{background:#2a2a2a;color:#888}
+.c .ch button{background:none;border:0;color:inherit;padding:0;font:inherit;cursor:pointer;text-decoration:underline}
+.c .ch button.n{background:#2d5a3d;border-radius:8px;padding:0 6px;text-decoration:none}
+button.dl{background:#2a4a7a;color:#fff;border:0;padding:.5rem 1rem;border-radius:6px;cursor:pointer}
+button.dl:disabled{opacity:.5;cursor:default}
+#pl{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:.6rem;z-index:10}
+#pl.on{display:flex}
+#pl video{width:min(960px,95vw);max-height:75vh;background:#000;border-radius:6px}
+#pl .bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:center;width:min(960px,95vw)}
+#pl .bar span{flex:1;min-width:10rem}
+#pl .bar button,#pl .bar a{background:#2a4a7a;color:#fff;border:0;padding:.4rem .8rem;border-radius:6px;cursor:pointer;text-decoration:none;font-size:.9rem}
+#msg{color:#f99;font-size:.9rem}
+</style></head><body>
+<h1>Onde dá o jogo</h1>
+<button class="dl" id="dl" disabled>Download matches.json</button>
+<div id="out">A carregar…</div>
+
+<div id="pl">
+  <video id="vid" controls autoplay playsinline></video>
+  <div id="msg"></div>
+  <div class="bar">
+    <span id="ptitle"></span>
+    <a id="popen" target="_blank" rel="noopener">Abrir link</a>
+    <button id="pcopy">Copiar link (VLC)</button>
+    <button id="pclose">Fechar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<script>
+const PROXY = "https://mycors.monteiro-n.workers.dev?";
+const BASE = "https://komunicamagazine.com/onde-da-bola/";
+// URL do teu Worker (o que gera a playlist)
+const PLAYLIST_URL = "https://vavoo-m3u.monteiro-n.workers.dev/playlist.m3u?country=Portugal";
+
+const lisbonDay = d => new Date(d).toLocaleDateString("sv-SE", {timeZone: "Europe/Lisbon"});
+
+const CHANNEL_NAMES = { "SCP.Tv": "Sporting TV" };
+const renameChannel = c => {
+  if (CHANNEL_NAMES[c]) return CHANNEL_NAMES[c];
+  if (/^Benfica[\s.,]*Tv$/i.test(c)) return "BTV";
+  return c.replace(/^Sport\.Tv\s*/i, "Sport Tv ").trim();
+};
+
+/* ---------- playlist matching ---------- */
+const NOISE = new Set(["hd","fhd","uhd","sd","4k","pt","portugal","raw","backup","hevc","h265","1080p","720p"]);
+const norm = s => String(s).toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/\(\s*\d+\s*\)/g, " ")   // source tags like "(1)" or "(6)"
+  .replace(/\+/g, " plus ")
+  .replace(/[^a-z0-9]+/g, " ").trim().split(" ")
+  .filter(w => w && !NOISE.has(w)).join("");
+
+// nomes alternativos na playlist (chave = nome normalizado do site)
+const ALIASES = {
+  btv: ["benficatv"],
+  sportingtv: ["scptv"]
+};
+
+function parseM3u(text) {
+  const out = [];
+  let name = null;
+  for (const line of text.split(/\r?\n/)) {
+    if (line.startsWith("#EXTINF")) name = line.slice(line.lastIndexOf(",") + 1).trim();
+    else if (line && !line.startsWith("#") && name) { out.push({name, url: line.trim()}); name = null; }
+  }
+  return out;
+}
+
+let INDEX = new Map(); // nome normalizado -> [{name,url}]
+async function loadPlaylist() {
+  try {
+    const res = await fetch(PLAYLIST_URL);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    for (const e of parseM3u(await res.text())) {
+      const k = norm(e.name);
+      if (!INDEX.has(k)) INDEX.set(k, []);
+      INDEX.get(k).push(e);
+    }
+  } catch (err) {
+    console.warn("Playlist indisponível:", err.message);
+  }
+}
+
+function streamsFor(channel) {
+  const k = norm(channel);
+  const keys = [k, ...(ALIASES[k] || [])];
+  const seen = new Set(), list = [];
+  for (const key of keys) for (const e of INDEX.get(key) || []) {
+    if (!seen.has(e.url)) { seen.add(e.url); list.push(e); }
+  }
+  // backups last (sort is stable, so the playlist order is kept otherwise)
+  return list.sort((a, b) => /backup/i.test(a.name) - /backup/i.test(b.name));
+}
+
+/* ---------- jogos ---------- */
+async function getMatches(url) {
+  const html = await (await fetch(PROXY + url)).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const ld = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+  const events = ld.itemListElement;
+
+  const rows = [...doc.querySelectorAll(".g-teams")].map(t => {
+    const row = t.closest("[class*=g-]:has(.g-chan)") || t.parentElement.parentElement;
+    return {
+      comp: (row.querySelector(".g-comp")?.textContent || "").trim(),
+      channels: [...(row.querySelector(".g-chan")?.children || [])].map(c => c.textContent.trim()).filter(Boolean)
+    };
+  });
+
+  return events.map((e, i) => ({
+    match: e.name,
+    start: e.startDate,
+    date: lisbonDay(e.startDate),
+    time: new Date(e.startDate).toLocaleTimeString("pt-PT", {hour: "2-digit", minute: "2-digit", timeZone: "Europe/Lisbon"}),
+    competition: rows[i]?.comp || "",
+    channels: (rows[i]?.channels || []).map(renameChannel)
+  })).filter(m => m.match !== "Vários vs Jogos");
+}
+
+async function getAll() {
+  const [today, tomorrow] = await Promise.all([
+    getMatches(BASE),
+    getMatches(BASE + "?dia=amanha")
+  ]);
+  return { today, tomorrow };
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function channelChip(name) {
+  const s = streamsFor(name);
+  if (!s.length) return `<span class="ch none" title="Sem stream na playlist">${esc(name)}</span>`;
+  const attr = i => `data-name="${esc(name)}" data-url="${esc(s[i].url)}" title="${esc(s[i].name)}"`;
+  if (s.length === 1) return `<span class="ch"><button ${attr(0)}>▶ ${esc(name)}</button></span>`;
+  return `<span class="ch">${esc(name)} ${s.map((_, i) => `<button class="n" ${attr(i)}>${i + 1}</button>`).join("")}</span>`;
+}
+
+function render(data) {
+  const out = document.getElementById("out");
+  out.innerHTML = "";
+  for (const [label, list] of [["Hoje", data.today], ["Amanhã", data.tomorrow]]) {
+    let html = `<h2>${label}</h2>`;
+    if (!list.length) html += "<p>Sem jogos.</p>";
+    for (const m of list) {
+      html += `<div class="m"><span class="t">${esc(m.time)}</span>
+        <span class="i">${esc(m.match)}<small>${esc(m.competition)}</small></span>
+        <span class="c">${m.channels.map(channelChip).join("")}</span></div>`;
+    }
+    out.insertAdjacentHTML("beforeend", html);
+  }
+}
+
+/* ---------- player ---------- */
+const $ = id => document.getElementById(id);
+let hls = null, currentUrl = "";
+
+function openPlayer(name, url) {
+  currentUrl = url;
+  $("ptitle").textContent = name;
+  $("popen").href = url;
+  $("msg").textContent = "";
+  $("pl").classList.add("on");
+  const v = $("vid");
+  if (hls) { hls.destroy(); hls = null; }
+
+  if (v.canPlayType("application/vnd.apple.mpegurl")) {
+    v.src = url; v.play().catch(() => {});
+  } else if (window.Hls && Hls.isSupported()) {
+    hls = new Hls();
+    hls.on(Hls.Events.ERROR, (_, d) => {
+      if (d.fatal) $("msg").textContent = "Não foi possível reproduzir aqui (bloqueio CORS?). Usa 'Copiar link' e abre no VLC.";
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+    v.play().catch(() => {});
+  } else {
+    $("msg").textContent = "Este browser não suporta HLS. Usa 'Copiar link' e abre no VLC.";
+  }
+}
+
+function closePlayer() {
+  if (hls) { hls.destroy(); hls = null; }
+  const v = $("vid"); v.pause(); v.removeAttribute("src"); v.load();
+  $("pl").classList.remove("on");
+}
+
+$("pclose").onclick = closePlayer;
+$("pcopy").onclick = async () => {
+  try { await navigator.clipboard.writeText(currentUrl); $("msg").style.color = "#9f9"; $("msg").textContent = "Link copiado."; }
+  catch { prompt("Copia o link:", currentUrl); }
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePlayer(); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-url]");
+  if (b) { $("msg").style.color = "#f99"; openPlayer(b.dataset.name, b.dataset.url); }
+});
+
+/* ---------- arranque ---------- */
+const wantsJson = new URLSearchParams(location.search).get("format") === "json";
+
+Promise.all([getAll(), loadPlaylist()]).then(([data]) => {
+  if (wantsJson) {
+    document.body.innerHTML = "";
+    const pre = document.createElement("pre");
+    pre.style.cssText = "white-space:pre-wrap;margin:0";
+    pre.textContent = JSON.stringify(data, null, 2);
+    document.body.appendChild(pre);
+    return;
+  }
+  render(data);
+  const btn = $("dl");
+  btn.disabled = false;
+  btn.onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: "application/json"}));
+    a.download = "matches.json";
+    a.click();
+  };
+}).catch(err => {
+  $("out").textContent = "Erro ao carregar: " + err.message;
+});
+</script>
+</body></html>
